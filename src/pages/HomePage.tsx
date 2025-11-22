@@ -2,7 +2,7 @@ import {useState, useEffect} from "react"
 import { Link } from "react-router-dom"
 import FavoriteList from "../components/FavoriteList"
 function HomePage(){
-    const [categories,setCategories]=useState(null)
+    const [categories,setCategories]=useState([])
     useEffect(()=>{
         const fetchCategories=async()=>{
             try{

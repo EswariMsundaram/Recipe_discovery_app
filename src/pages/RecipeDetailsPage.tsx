@@ -1,41 +1,65 @@
-import { useEffect , useState} from "react"
+import { useState, useEffect} from "react"
 import { useParams } from "react-router-dom"
-import {FavoriteContext} from "/Users/eswar/Desktop/2025-rtt-54/mod10/recipe-discovery-app/src/context/FavoriteContext.tsx"
+import { useFavorites } from "../context/FavoriteContext"
+
 
 function RecipeDetailsPage(){
-
-    // const {addFavorite} 
     const {idMeal}=useParams()
-    const [recipe,setRecipe]=useState(null)
+    const {addFavorite, removeFavorite, isFavorite}=useFavorites() 
+   const [recipe,setRecipe]=useState(null)
+   const [loading,setLoading]=useState(true)
+
     useEffect(()=>{
         const fetchRecipe= async()=>{
             try{
+                setLoading(true)
                 const response= await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${idMeal}`)
+
                 const data=await response.json()
-                console.log(data)
                 setRecipe(data.meals[0])
             }catch(error){
                 console.error(error)
+            }finally{
+                setLoading(false)
             }
         }
         fetchRecipe()
     },[idMeal])
 
-    if(!recipe) return <h2>Loading Recipe...</h2>
+    if(!loading) return <h2>Loading Recipe...</h2>
+    if(!recipe) return <h2>Recipe not found</h2>
+
+    //Extract ingredients and measures
+    const ingredients = []
+    for(let i=1;i<=20;i++){
+        const ingredient=recipe[`strIngredient${i}`]
+        const measure=recipe[`strMeasure${i}`]
+
+        //Add only if not empty
+        if(ingredient && ingredient.trim()!==""){
+            ingredients.push(`${ingredient} - ${measure}`)
+        }
+    }
+
     return(
         <>
         <h3>{recipe.strMeal}</h3>
         <img src={recipe.strMealThumb} alt={recipe.strMeal}/>
+        <h3>Ingredients</h3>
+        <ul>
+            {ingredients.map((item,index)=>(
+                <li key={index}>{item}</li>
+            ))}
+        </ul>
         <h3>Instructions</h3>
-        {Object.keys(recipe)
-        .filter(key=>key.startsWith("strIngredient")&& recipe[key]).map((key,index)=>{
-            console.log(recipe[`strMeasure ${index}`])
-            const ingredient=recipe[key]
-            const measure=recipe[`strMeasure ${index+1}`]
-            return<li>{ingredient} - {measure}</li>
-        })}
         <p>{recipe.strInstructions}</p>
-        <button onClick={()=>addFavorite(recipe.idMeal)}>Add to Favorites</button>
+        <button onClick={()=>
+            isFavorite(recipe.idMeal) ?
+            removeFavorite(recipe.idMeal) :
+            addFavorite({idMeal:recipe.idMeal, strMeal: recipe.strMeal, strMealThumb: recipe.strMealThumb})} 
+        >
+            {isFavorite(recipe.idMeal)?"Remove from Favorites" : "Add to Favorites"}
+        </button>
         </>
     )
 }

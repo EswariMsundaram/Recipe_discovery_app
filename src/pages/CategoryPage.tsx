@@ -13,8 +13,8 @@ function CategoryPage(){
                 const data=await response.json();
                 console.log(data)
                 setRecipes(data.meals)
-            }catch(e){
-                console.error(e.message)
+            }catch(error){
+                console.error(error.message)
             }
         }
         fetchRecipes()
