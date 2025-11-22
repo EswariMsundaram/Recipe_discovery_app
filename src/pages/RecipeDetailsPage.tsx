@@ -26,7 +26,7 @@ function RecipeDetailsPage(){
         fetchRecipe()
     },[idMeal])
 
-    if(!loading) return <h2>Loading Recipe...</h2>
+    if(loading) return <h2>Loading Recipe...</h2>
     if(!recipe) return <h2>Recipe not found</h2>
 
     //Extract ingredients and measures
